@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Insighters</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal: #0F6E56;
+  --teal-light: #E1F5EE;
+  --teal-mid: #1D9E75;
+  --teal-dark: #085041;
+  --teal-deep: #04342C;
+  --bg: #ffffff;
+  --bg2: #f7f8f7;
+  --bg3: #f0f2f0;
+  --text: #111;
+  --text2: #555;
+  --text3: #999;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.12);
+  --purple-bg: #EEEDFE;
+  --purple-text: #3C3489;
+  --amber-bg: #FAEEDA;
+  --amber-text: #633806;
+  --coral-bg: #FAECE7;
+  --coral-text: #712B13;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  font-family: 'DM Sans', sans-serif;
+  background: #e8ede8;
+  height: 100%;
+  overflow: hidden;
+}
+.app {
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
+  margin: 0 auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.screen {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+.screen.active { display: flex; }
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* STATUS BAR */
+.statusbar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+  flex-shrink: 0;
+}
+
+/* BOTTOM NAV */
+.bottomnav {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  border-top: 0.5px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+  padding-bottom: 8px;
+}
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 12px;
+  transition: background 0.15s;
+}
+.nav-btn:active { background: var(--bg3); }
+.nav-btn svg { width: 22px; height: 22px; stroke: var(--text3); fill: none; stroke-width: 1.6; }
+.nav-btn.active svg { stroke: var(--teal); }
+.nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--teal); }
+
+/* COMMON */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 4px 16px 10px; flex-shrink: 0; }
+.logo { width: 36px; height: 36px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #E1F5EE; }
+.page-title { font-size: 18px; font-weight: 600; color: var(--text); }
+.icon-btn { width: 36px; height: 36px; border-radius: 50%; border: 0.5px solid var(--border2); background: var(--bg); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.icon-btn svg { width: 16px; height: 16px; stroke: var(--text2); fill: none; stroke-width: 1.5; }
+.avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 500; flex-shrink: 0; }
+.av-ar { background: #9FE1CB; color: #085041; }
+.av-sn { background: #CECBF6; color: #3C3489; }
+.av-kp { background: #FAC775; color: #633806; }
+.av-mr { background: #F5C4B3; color: #712B13; }
+.av-vk { background: #E1F5EE; color: #085041; }
+.hub-pill { font-size: 12px; padding: 5px 13px; border-radius: 20px; border: 0.5px solid var(--border2); color: var(--text2); background: var(--bg); white-space: nowrap; cursor: pointer; transition: all 0.15s; }
+.hub-pill.active { background: var(--teal); color: var(--teal-light); border-color: var(--teal); }
+.tag { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--teal-light); color: var(--teal-dark); }
+.sec-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px 8px; flex-shrink: 0; }
+.sec-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; }
+.see-all { font-size: 12px; color: var(--teal); font-weight: 500; }
+.divider { height: 0.5px; background: var(--border); margin: 4px 16px; }
+.teal-btn { background: var(--teal); color: var(--teal-light); border: none; border-radius: 20px; font-size: 12px; font-weight: 500; padding: 6px 16px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.outline-btn { background: transparent; color: var(--teal); border: 0.5px solid var(--teal); border-radius: 20px; font-size: 12px; font-weight: 500; padding: 6px 16px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+/* ============ HOME SCREEN ============ */
+.home-topbar { display: flex; align-items: center; gap: 10px; padding: 4px 16px 10px; flex-shrink: 0; }
+.search-inline { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--bg2); border-radius: 22px; padding: 8px 14px; border: 0.5px solid var(--border); cursor: pointer; }
+.search-inline svg { width: 14px; height: 14px; stroke: var(--teal); fill: none; stroke-width: 1.5; flex-shrink: 0; }
+.search-inline span { font-size: 13px; color: var(--text3); }
+.feed-tabs { display: flex; padding: 0 16px; border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
+.feed-tab { font-size: 13px; font-weight: 500; padding: 8px 16px; color: var(--text2); border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.15s; }
+.feed-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+.hubs-row { display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+.hubs-row::-webkit-scrollbar { display: none; }
+.article-hero { margin: 6px 16px 10px; border-radius: 16px; overflow: hidden; border: 0.5px solid var(--border); cursor: pointer; }
+.article-hero-img { height: 120px; background: var(--teal-dark); display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; }
+.source-badge { display: inline-block; background: rgba(255,255,255,0.18); border-radius: 6px; padding: 3px 8px; font-size: 10px; color: #E1F5EE; margin-bottom: 6px; }
+.hero-title { font-size: 14px; font-weight: 500; color: #fff; line-height: 1.4; }
+.article-hero-body { padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
+.article-meta-text { font-size: 11px; color: var(--text2); }
+.save-btn { font-size: 11px; padding: 4px 12px; border-radius: 20px; border: 0.5px solid var(--teal); color: var(--teal); background: transparent; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.post-card { margin: 6px 16px; padding: 14px; border-radius: 16px; border: 0.5px solid var(--border); background: var(--bg); cursor: pointer; transition: background 0.15s; }
+.post-card:active { background: var(--bg2); }
+.post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.post-info { flex: 1; }
+.post-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.post-user { font-size: 11px; color: var(--text3); }
+.more-btn { color: var(--text3); font-size: 20px; line-height: 1; padding: 0 4px; cursor: pointer; }
+.post-body { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
+.post-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.post-actions { display: flex; gap: 14px; align-items: center; }
+.action { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text2); cursor: pointer; padding: 3px 0; }
+.action svg { width: 14px; height: 14px; stroke: var(--text2); fill: none; stroke-width: 1.5; }
+.action.liked svg { stroke: var(--teal); fill: var(--teal-light); }
+.post-time { font-size: 11px; color: var(--text3); margin-left: auto; }
+.fab { position: absolute; bottom: 80px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(15,110,86,0.35); cursor: pointer; z-index: 10; transition: transform 0.15s; }
+.fab:active { transform: scale(0.94); }
+.fab svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; }
+
+/* ============ SEARCH SCREEN ============ */
+.searchbar-full { display: flex; align-items: center; gap: 10px; margin: 4px 16px 12px; background: var(--bg2); border-radius: 24px; padding: 10px 16px; border: 0.5px solid var(--border2); }
+.searchbar-full svg { width: 16px; height: 16px; stroke: var(--teal); fill: none; stroke-width: 1.5; }
+.searchbar-full input { flex: 1; background: none; border: none; outline: none; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); }
+.searchbar-full input::placeholder { color: var(--text3); }
+.filter-tabs-row { display: flex; gap: 6px; padding: 0 16px 10px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+.filter-tabs-row::-webkit-scrollbar { display: none; }
+.recents-scroll { display: flex; gap: 14px; padding: 4px 16px 14px; overflow-x: auto; scrollbar-width: none; }
+.recents-scroll::-webkit-scrollbar { display: none; }
+.recent-item { display: flex; flex-direction: column; align-items: center; gap: 5px; flex-shrink: 0; cursor: pointer; }
+.recent-item:active { opacity: 0.7; }
+.rname { font-size: 11px; color: var(--text2); max-width: 52px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trending-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 0.5px solid var(--border); cursor: pointer; }
+.trending-item:active { background: var(--bg2); }
+.trend-num { font-size: 13px; font-weight: 600; color: var(--teal); width: 20px; flex-shrink: 0; }
+.trend-info { flex: 1; }
+.trend-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.trend-count { font-size: 11px; color: var(--text3); }
+.user-row { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 0.5px solid var(--border); cursor: pointer; }
+.user-row:active { background: var(--bg2); }
+.uinfo { flex: 1; min-width: 0; }
+.uname { font-size: 13px; font-weight: 500; color: var(--text); }
+.uhandle { font-size: 11px; color: var(--text3); }
+.utags { display: flex; gap: 4px; margin-top: 4px; }
+.utag { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--teal-light); color: var(--teal-dark); }
+
+/* ============ WRITE SCREEN ============ */
+.compose-topbar { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px 12px; flex-shrink: 0; }
+.cancel-text { font-size: 14px; color: var(--text2); cursor: pointer; }
+.compose-title { font-size: 14px; font-weight: 500; color: var(--text); }
+.type-tabs { display: flex; padding: 0 16px; border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
+.type-tab { font-size: 13px; font-weight: 500; padding: 8px 16px; color: var(--text2); border-bottom: 2px solid transparent; cursor: pointer; }
+.type-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+.composer-row { display: flex; gap: 10px; padding: 14px 16px; }
+.composer-body { flex: 1; }
+.user-line { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.compose-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.hub-selector { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; background: var(--teal-light); border: none; cursor: pointer; }
+.hub-selector span { font-size: 11px; font-weight: 500; color: var(--teal-dark); }
+.hub-selector svg { width: 12px; height: 12px; stroke: var(--teal-dark); fill: none; stroke-width: 2; }
+.compose-textarea { width: 100%; min-height: 120px; border: none; outline: none; font-size: 15px; font-family: 'DM Sans', sans-serif; color: var(--text); resize: none; line-height: 1.6; }
+.compose-textarea::placeholder { color: var(--text3); }
+.char-count { font-size: 11px; color: var(--text3); text-align: right; margin-top: 6px; }
+.audience-row { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px; background: var(--bg2); margin: 0 16px 12px; }
+.audience-row svg { width: 13px; height: 13px; stroke: var(--teal); fill: none; stroke-width: 1.5; }
+.audience-row span { font-size: 12px; color: var(--teal); font-weight: 500; }
+.audience-row .aud-change { font-size: 11px; color: var(--text3); margin-left: auto; cursor: pointer; }
+.media-bar { display: flex; align-items: center; padding: 10px 16px; border-top: 0.5px solid var(--border); flex-shrink: 0; }
+.media-tools { display: flex; gap: 20px; flex: 1; }
+.media-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px; border-radius: 8px; transition: background 0.15s; }
+.media-btn:active { background: var(--bg2); }
+.media-btn svg { width: 20px; height: 20px; stroke: var(--text3); fill: none; stroke-width: 1.5; }
+.media-btn span { font-size: 9px; color: var(--text3); }
+
+/* ============ NOTIFICATIONS SCREEN ============ */
+.notif-tabs { display: flex; gap: 6px; padding: 0 16px 10px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+.notif-tabs::-webkit-scrollbar { display: none; }
+.notif-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-bottom: 0.5px solid var(--border); cursor: pointer; position: relative; transition: background 0.15s; }
+.notif-item:active { background: var(--bg2); }
+.notif-item.unread { background: rgba(15,110,86,0.04); }
+.unread-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); position: absolute; left: 7px; top: 17px; }
+.notif-avatar-wrap { position: relative; flex-shrink: 0; }
+.notif-icon { width: 17px; height: 17px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; bottom: -2px; right: -3px; border: 1.5px solid var(--bg); }
+.notif-icon svg { width: 9px; height: 9px; fill: none; stroke-width: 2; }
+.notif-content { flex: 1; min-width: 0; }
+.notif-text { font-size: 13px; color: var(--text); line-height: 1.4; }
+.notif-text b { font-weight: 500; }
+.notif-preview { font-size: 11px; color: var(--text2); margin-top: 5px; background: var(--bg2); padding: 6px 10px; border-radius: 8px; line-height: 1.4; }
+.notif-time { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+/* ============ PROFILE SCREEN ============ */
+.cover-photo { height: 100px; background: var(--teal-dark); position: relative; flex-shrink: 0; }
+.cover-topbar { position: absolute; top: 10px; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+.cover-btn { width: 30px; height: 30px; border-radius: 50%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.cover-btn svg { width: 14px; height: 14px; stroke: #fff; fill: none; stroke-width: 2; }
+.profile-avatar-wrap { position: absolute; bottom: -26px; left: 16px; }
+.profile-av { width: 56px; height: 56px; border-radius: 50%; font-size: 16px; border: 3px solid var(--bg); }
+.profile-actions { position: absolute; bottom: -18px; right: 16px; display: flex; gap: 8px; align-items: center; }
+.profile-info { padding: 36px 16px 12px; }
+.profile-name { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.profile-handle { font-size: 12px; color: var(--text3); margin-bottom: 8px; }
+.profile-bio { font-size: 13px; color: var(--text); line-height: 1.55; margin-bottom: 10px; }
+.profile-hub-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.profile-socials { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+.social-link { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--teal); font-weight: 500; cursor: pointer; }
+.social-link svg { width: 12px; height: 12px; stroke: var(--teal); fill: none; stroke-width: 1.5; }
+.stats-row { display: flex; gap: 6px; margin-bottom: 4px; }
+.stat { flex: 1; text-align: center; padding: 8px 0; background: var(--bg2); border-radius: 10px; }
+.stat-num { font-size: 15px; font-weight: 600; color: var(--text); }
+.stat-label { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.profile-tabs { display: flex; padding: 0 16px; border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
+.profile-tab { font-size: 13px; font-weight: 500; padding: 8px 16px; color: var(--text2); border-bottom: 2px solid transparent; cursor: pointer; }
+.profile-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+.pinned-label { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text3); margin-bottom: 6px; }
+.pinned-label svg { width: 11px; height: 11px; stroke: var(--text3); fill: none; stroke-width: 1.5; }
+
+/* HUB SELECTOR MODAL */
+.modal-overlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: flex-end; }
+.modal-overlay.open { display: flex; }
+.modal-sheet { background: var(--bg); border-radius: 20px 20px 0 0; padding: 16px; width: 100%; }
+.modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 14px; }
+.modal-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 14px; }
+.hub-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.hub-option { font-size: 13px; padding: 7px 16px; border-radius: 20px; border: 0.5px solid var(--border2); color: var(--text2); cursor: pointer; transition: all 0.15s; }
+.hub-option.selected { background: var(--teal); color: var(--teal-light); border-color: var(--teal); }
+.modal-done { width: 100%; margin-top: 16px; padding: 12px; border-radius: 14px; background: var(--teal); color: #fff; border: none; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+
+/* POST DETAIL */
+.back-topbar { display: flex; align-items: center; gap: 10px; padding: 6px 16px 10px; flex-shrink: 0; }
+.back-topbar button { background: none; border: none; cursor: pointer; display: flex; align-items: center; }
+.back-topbar button svg { width: 20px; height: 20px; stroke: var(--text); fill: none; stroke-width: 1.8; }
+.post-detail-body { font-size: 15px; color: var(--text); line-height: 1.65; margin-bottom: 14px; }
+.post-detail-time { font-size: 12px; color: var(--text3); margin-bottom: 14px; }
+.stats-bar { display: flex; gap: 16px; padding: 10px 0; border-top: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); margin-bottom: 14px; }
+.stat-item { font-size: 13px; color: var(--text); }
+.stat-item b { font-weight: 600; }
+.stat-item span { color: var(--text3); }
+.comment-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+.comment-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+.comment-time { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+/* Animations */
+.screen { animation: fadeIn 0.18s ease; }
+@keyframes fadeIn { from { opacity: 0.6; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.post-card, .notif-item, .user-row, .trending-item { transition: transform 0.1s; }
+.post-card:active { transform: scale(0.99); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HOME SCREEN -->
+  <div class="screen active" id="screen-home">
+    <div class="statusbar"><span>9:41</span><span style="display:flex;gap:4px;align-items:center"><svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><rect x="0" y="4" width="2" height="6" rx="0.5"/><rect x="3" y="2.5" width="2" height="7.5" rx="0.5"/><rect x="6" y="1" width="2" height="9" rx="0.5"/><rect x="9" y="0" width="2" height="10" rx="0.5"/></svg> ●●</span></div>
+    <div class="home-topbar">
+      <div class="logo">IN</div>
+      <div class="search-inline" onclick="switchScreen('search')">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+        <span>Search people, hubs...</span>
+      </div>
+      <div class="icon-btn"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="17" y2="18"/></svg></div>
+    </div>
+    <div class="feed-tabs" id="feed-tabs">
+      <div class="feed-tab active" onclick="switchFeedTab(this,'following-feed')">Following</div>
+      <div class="feed-tab" onclick="switchFeedTab(this,'suggested-feed')">Suggested</div>
+    </div>
+    <div class="hubs-row" id="home-hubs">
+      <div class="hub-pill active" onclick="filterHub(this)">All</div>
+      <div class="hub-pill" onclick="filterHub(this)">Startups</div>
+      <div class="hub-pill" onclick="filterHub(this)">AI/ML</div>
+      <div class="hub-pill" onclick="filterHub(this)">Crypto</div>
+      <div class="hub-pill" onclick="filterHub(this)">Software</div>
+      <div class="hub-pill" onclick="filterHub(this)">Freelance</div>
+      <div class="hub-pill" onclick="filterHub(this)">DSA</div>
+    </div>
+    <div class="scroll-area" id="home-scroll">
+      <div id="following-feed">
+        <!-- Hero Article -->
+        <div class="sec-header"><div class="sec-label">Top article today</div><div class="see-all">See all</div></div>
+        <div class="article-hero" onclick="showToast('Opening article...')">
+          <div class="article-hero-img">
+            <div class="source-badge">TechCrunch</div>
+            <div class="hero-title">OpenAI raises $40B — the biggest private tech funding round ever</div>
+          </div>
+          <div class="article-hero-body">
+            <div class="article-meta-text">AI/ML · 5 min read · 2h ago · 1.2k saves</div>
+            <button class="save-btn" onclick="event.stopPropagation();showToast('Saved!')">+ Save</button>
+          </div>
+        </div>
+        <div class="sec-header"><div class="sec-label">From people you follow</div></div>
+        <!-- Post 1 -->
+        <div class="post-card" onclick="showPost(0)">
+          <div class="post-header">
+            <div class="avatar av-ar" style="width:38px;height:38px;font-size:12px">AR</div>
+            <div class="post-info"><div class="post-name">Arjun Reddy</div><div class="post-user">@arjunreddy · 45m ago</div></div>
+            <div class="more-btn" onclick="event.stopPropagation();showToast('Options')">···</div>
+          </div>
+          <div class="post-body">The startup funding landscape has shifted dramatically. Seed rounds that used to close in 2 weeks now take 3 months. Here's what changed and how founders can navigate it →</div>
+          <div class="post-tags"><div class="tag">Startups</div><div class="tag">Funding</div></div>
+          <div class="post-actions">
+            <div class="action" onclick="event.stopPropagation();toggleLike(this)"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg><span>24</span></div>
+            <div class="action" onclick="event.stopPropagation();showToast('Replies')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>8</span></div>
+            <div class="action" onclick="event.stopPropagation();showToast('Reposted!')"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span>3</span></div>
+            <div class="post-time">Mar 15</div>
+          </div>
+        </div>
+        <!-- Post 2 -->
+        <div class="post-card" onclick="showPost(1)">
+          <div class="post-header">
+            <div class="avatar av-sn" style="width:38px;height:38px;font-size:12px">SN</div>
+            <div class="post-info"><div class="post-name">Sneha Nair</div><div class="post-user">@sneha · 2h ago</div></div>
+            <div class="more-btn" onclick="event.stopPropagation();showToast('Options')">···</div>
+          </div>
+          <div class="post-body">Just shipped our first open-source AI toolkit. 200 GitHub stars in 24 hours. Here's what we built, why we open-sourced it, and what's next for the project →</div>
+          <div class="post-tags"><div class="tag">AI/ML</div><div class="tag">Software</div></div>
+          <div class="post-actions">
+            <div class="action" onclick="event.stopPropagation();toggleLike(this)"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg><span>41</span></div>
+            <div class="action" onclick="event.stopPropagation();showToast('Replies')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>12</span></div>
+            <div class="action" onclick="event.stopPropagation();showToast('Reposted!')"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span>7</span></div>
+            <div class="post-time">Mar 15</div>
+          </div>
+        </div>
+        <!-- Article row -->
+        <div class="sec-header" style="margin-top:4px"><div class="sec-label">Articles for you</div><div class="see-all">See all</div></div>
+        <div class="post-card" onclick="showToast('Opening article...')" style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:68px;height:68px;border-radius:10px;background:var(--purple-bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--purple-text)">WSJ</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500;color:var(--text);line-height:1.4;margin-bottom:4px">India's startup ecosystem hits record $12B in Q1 funding</div>
+            <div style="font-size:11px;color:var(--text3)">Startups · 4 min · 3h ago</div>
+          </div>
+        </div>
+        <!-- Post 3 -->
+        <div class="post-card" onclick="showPost(2)">
+          <div class="post-header">
+            <div class="avatar av-kp" style="width:38px;height:38px;font-size:12px">KP</div>
+            <div class="post-info"><div class="post-name">Karan Patel</div><div class="post-user">@karanp · 4h ago</div></div>
+            <div class="more-btn" onclick="event.stopPropagation();showToast('Options')">···</div>
+          </div>
+          <div class="post-body">Unpopular opinion: Most startups don't need a co-founder. What they need is strong advisors, good hiring, and a founder who can learn fast. The co-founder obsession in VC culture is overrated.</div>
+          <div class="post-tags"><div class="tag">Startups</div></div>
+          <div class="post-actions">
+            <div class="action" onclick="event.stopPropagation();toggleLike(this)"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg><span>87</span></div>
+            <div class="action" onclick="event.stopPropagation();showToast('Replies')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>34</span></div>
+            <div class="action" onclick="event.stopPropagation();showToast('Reposted!')"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span>19</span></div>
+            <div class="post-time">Mar 15</div>
+          </div>
+        </div>
+        <div style="height:16px"></div>
+      </div>
+      <div id="suggested-feed" style="display:none">
+        <div class="sec-header"><div class="sec-label">Suggested for you</div></div>
+        <div class="post-card" onclick="showPost(3)">
+          <div class="post-header">
+            <div class="avatar av-mr" style="width:38px;height:38px;font-size:12px">MR</div>
+            <div class="post-info"><div class="post-name">Meera Rao</div><div class="post-user">@meera · 1h ago</div></div>
+            <button class="teal-btn" style="font-size:11px;padding:5px 12px" onclick="event.stopPropagation();showToast('Following Meera!')">Follow</button>
+          </div>
+          <div class="post-body">The best engineers I know don't optimize for salary. They optimize for learning velocity. Your skills compound faster than your savings at this stage of your career.</div>
+          <div class="post-tags"><div class="tag">Software</div></div>
+          <div class="post-actions">
+            <div class="action" onclick="event.stopPropagation();toggleLike(this)"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg><span>156</span></div>
+            <div class="action" onclick="event.stopPropagation();showToast('Replies')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>28</span></div>
+            <div class="action" onclick="event.stopPropagation();showToast('Reposted!')"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span>42</span></div>
+            <div class="post-time">Mar 15</div>
+          </div>
+        </div>
+        <div style="height:16px"></div>
+      </div>
+    </div>
+    <div class="fab" onclick="switchScreen('write')">
+      <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    </div>
+    <div class="bottomnav">
+      <button class="nav-btn active" onclick="switchScreen('home')"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="nav-dot"></div></button>
+      <button class="nav-btn" onclick="switchScreen('search')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+      <button class="nav-btn" onclick="switchScreen('write')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+      <button class="nav-btn" onclick="switchScreen('notif')"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+      <button class="nav-btn" onclick="switchScreen('profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+    </div>
+  </div>
+
+  <!-- SEARCH SCREEN -->
+  <div class="screen" id="screen-search">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="searchbar-full">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+      <input type="text" placeholder="Search people, hubs, articles..." id="search-input" oninput="handleSearch(this.value)">
+    </div>
+    <div class="filter-tabs-row">
+      <div class="hub-pill active" onclick="filterHub(this)">All</div>
+      <div class="hub-pill" onclick="filterHub(this)">People</div>
+      <div class="hub-pill" onclick="filterHub(this)">Hubs</div>
+      <div class="hub-pill" onclick="filterHub(this)">Articles</div>
+      <div class="hub-pill" onclick="filterHub(this)">Posts</div>
+    </div>
+    <div class="scroll-area">
+      <div class="sec-header"><div class="sec-label">Recent searches</div><div class="see-all" onclick="showToast('Cleared!')">Clear all</div></div>
+      <div class="recents-scroll">
+        <div class="recent-item" onclick="showToast('Searching Arjun...')"><div class="avatar av-ar" style="width:48px;height:48px;font-size:13px">AR</div><div class="rname">Arjun R.</div></div>
+        <div class="recent-item" onclick="showToast('Searching Sneha...')"><div class="avatar av-sn" style="width:48px;height:48px;font-size:13px">SN</div><div class="rname">Sneha N.</div></div>
+        <div class="recent-item" onclick="showToast('Searching Karan...')"><div class="avatar av-kp" style="width:48px;height:48px;font-size:13px">KP</div><div class="rname">Karan P.</div></div>
+        <div class="recent-item" onclick="showToast('Searching Meera...')"><div class="avatar av-mr" style="width:48px;height:48px;font-size:13px">MR</div><div class="rname">Meera R.</div></div>
+        <div class="recent-item" onclick="showToast('Searching Vikram...')"><div class="avatar av-vk" style="width:48px;height:48px;font-size:13px">VK</div><div class="rname">Vikram K.</div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="sec-header"><div class="sec-label">Trending hubs</div></div>
+      <div class="trending-item" onclick="showToast('Opening AI/ML hub')">
+        <div class="trend-num">#1</div>
+        <div class="trend-info"><div class="trend-name">AI/ML</div><div class="trend-count">12.4k posts this week</div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="trending-item" onclick="showToast('Opening Startups hub')">
+        <div class="trend-num">#2</div>
+        <div class="trend-info"><div class="trend-name">Startups</div><div class="trend-count">8.1k posts this week</div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="trending-item" onclick="showToast('Opening Funding hub')">
+        <div class="trend-num">#3</div>
+        <div class="trend-info"><div class="trend-name">Funding</div><div class="trend-count">5.7k posts this week</div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="trending-item" onclick="showToast('Opening Software hub')">
+        <div class="trend-num">#4</div>
+        <div class="trend-info"><div class="trend-name">Software</div><div class="trend-count">4.3k posts this week</div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="divider" style="margin-top:4px"></div>
+      <div class="sec-header"><div class="sec-label">Suggested people</div><div class="see-all">See all</div></div>
+      <div class="user-row" onclick="showToast('Opening profile')">
+        <div class="avatar av-sn" style="width:42px;height:42px;font-size:12px">SN</div>
+        <div class="uinfo"><div class="uname">Sneha Nair</div><div class="uhandle">@sneha · SWE @Google</div><div class="utags"><div class="utag">AI/ML</div><div class="utag">Software</div></div></div>
+        <button class="teal-btn" onclick="event.stopPropagation();showToast('Following Sneha!')">Follow</button>
+      </div>
+      <div class="user-row" onclick="showToast('Opening profile')">
+        <div class="avatar av-kp" style="width:42px;height:42px;font-size:12px">KP</div>
+        <div class="uinfo"><div class="uname">Karan Patel</div><div class="uhandle">@karanp · Founder @NeuralOS</div><div class="utags"><div class="utag">Startups</div><div class="utag">Funding</div></div></div>
+        <button class="teal-btn" onclick="event.stopPropagation();showToast('Following Karan!')">Follow</button>
+      </div>
+      <div class="user-row" onclick="showToast('Opening profile')">
+        <div class="avatar av-vk" style="width:42px;height:42px;font-size:12px">VK</div>
+        <div class="uinfo"><div class="uname">Vikram Kumar</div><div class="uhandle">@vikramk · PM @Razorpay</div><div class="utags"><div class="utag">Crypto</div><div class="utag">Freelance</div></div></div>
+        <button class="teal-btn" onclick="event.stopPropagation();showToast('Following Vikram!')">Follow</button>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+    <div class="bottomnav">
+      <button class="nav-btn" onclick="switchScreen('home')"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+      <button class="nav-btn active" onclick="switchScreen('search')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><div class="nav-dot"></div></button>
+      <button class="nav-btn" onclick="switchScreen('write')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+      <button class="nav-btn" onclick="switchScreen('notif')"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+      <button class="nav-btn" onclick="switchScreen('profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+    </div>
+  </div>
+
+  <!-- WRITE SCREEN -->
+  <div class="screen" id="screen-write">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="compose-topbar">
+      <div class="cancel-text" onclick="switchScreen('home')">Cancel</div>
+      <div class="compose-title">New post</div>
+      <button class="teal-btn" onclick="submitPost()">Post</button>
+    </div>
+    <div class="type-tabs">
+      <div class="type-tab active" onclick="switchTypeTab(this,'short')">Short post</div>
+      <div class="type-tab" onclick="switchTypeTab(this,'longform')">Long-form</div>
+    </div>
+    <div class="scroll-area">
+      <div class="composer-row">
+        <div class="avatar av-ar" style="width:40px;height:40px;font-size:12px">AR</div>
+        <div class="composer-body">
+          <div class="user-line">
+            <div class="compose-name">Arjun Reddy</div>
+            <div class="hub-selector" onclick="openHubModal()">
+              <span id="selected-hub-text">Select hub</span>
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <textarea class="compose-textarea" id="compose-text" placeholder="What insight are you sharing today?" oninput="updateCharCount(this)"></textarea>
+          <div class="char-count" id="char-count">0 / 280</div>
+        </div>
+      </div>
+      <div class="audience-row">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Everyone can reply</span>
+        <div class="aud-change">Change</div>
+      </div>
+      <div style="height:8px"></div>
+    </div>
+    <div class="media-bar">
+      <div class="media-tools">
+        <div class="media-btn" onclick="showToast('Add photo')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Photo</span></div>
+        <div class="media-btn" onclick="showToast('Add link')"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span>Link</span></div>
+        <div class="media-btn" onclick="showToast('Add GIF')"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M7 12h3m2 0h2"/><path d="M16 10v4"/></svg><span>GIF</span></div>
+        <div class="media-btn" onclick="showToast('Add poll')"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Poll</span></div>
+      </div>
+    </div>
+    <div class="bottomnav">
+      <button class="nav-btn" onclick="switchScreen('home')"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+      <button class="nav-btn" onclick="switchScreen('search')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+      <button class="nav-btn active" onclick="switchScreen('write')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><div class="nav-dot"></div></button>
+      <button class="nav-btn" onclick="switchScreen('notif')"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+      <button class="nav-btn" onclick="switchScreen('profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS SCREEN -->
+  <div class="screen" id="screen-notif">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="topbar"><div class="page-title">Notifications</div><div class="see-all" onclick="showToast('All marked as read')">Mark all read</div></div>
+    <div class="notif-tabs">
+      <div class="hub-pill active" onclick="filterHub(this)">All</div>
+      <div class="hub-pill" onclick="filterHub(this)">Mentions</div>
+      <div class="hub-pill" onclick="filterHub(this)">Likes</div>
+      <div class="hub-pill" onclick="filterHub(this)">Follows</div>
+      <div class="hub-pill" onclick="filterHub(this)">Reposts</div>
+    </div>
+    <div class="scroll-area">
+      <div class="sec-header"><div class="sec-label">New</div></div>
+      <div class="notif-item unread" onclick="showPost(0)">
+        <div class="unread-dot"></div>
+        <div class="notif-avatar-wrap">
+          <div class="avatar av-sn" style="width:40px;height:40px;font-size:12px">SN</div>
+          <div class="notif-icon" style="background:#0F6E56"><svg viewBox="0 0 24 24" stroke="#E1F5EE" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg></div>
+        </div>
+        <div class="notif-content">
+          <div class="notif-text"><b>Sneha Nair</b> and <b>3 others</b> liked your post</div>
+          <div class="notif-preview">"The startup funding landscape has shifted dramatically..."</div>
+          <div class="notif-time">2 min ago</div>
+        </div>
+      </div>
+      <div class="notif-item unread" onclick="switchScreen('profile')">
+        <div class="unread-dot"></div>
+        <div class="notif-avatar-wrap">
+          <div class="avatar av-kp" style="width:40px;height:40px;font-size:12px">KP</div>
+          <div class="notif-icon" style="background:#534AB7"><svg viewBox="0 0 24 24" stroke="#EEEDFE" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        </div>
+        <div class="notif-content" style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div>
+            <div class="notif-text"><b>Karan Patel</b> started following you</div>
+            <div class="notif-time">15 min ago · Startups · Funding</div>
+          </div>
+          <button class="teal-btn" style="font-size:11px;padding:5px 12px;margin-top:2px" onclick="event.stopPropagation();showToast('Following Karan!')">Follow</button>
+        </div>
+      </div>
+      <div class="notif-item unread" onclick="showPost(0)">
+        <div class="unread-dot"></div>
+        <div class="notif-avatar-wrap">
+          <div class="avatar av-mr" style="width:40px;height:40px;font-size:12px">MR</div>
+          <div class="notif-icon" style="background:#D85A30"><svg viewBox="0 0 24 24" stroke="#FAECE7" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        </div>
+        <div class="notif-content">
+          <div class="notif-text"><b>Meera Rao</b> replied to your post</div>
+          <div class="notif-preview">"This is exactly what I've been seeing too — the bar for seed has gone up significantly..."</div>
+          <div class="notif-time">1h ago</div>
+        </div>
+      </div>
+      <div class="sec-header" style="margin-top:6px"><div class="sec-label">Earlier</div></div>
+      <div class="notif-item" onclick="showPost(1)">
+        <div class="notif-avatar-wrap">
+          <div class="avatar av-vk" style="width:40px;height:40px;font-size:12px">VK</div>
+          <div class="notif-icon" style="background:#1D9E75"><svg viewBox="0 0 24 24" stroke="#E1F5EE" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
+        </div>
+        <div class="notif-content">
+          <div class="notif-text"><b>Vikram Kumar</b> reposted your post</div>
+          <div class="notif-time">3h ago</div>
+        </div>
+      </div>
+      <div class="notif-item" onclick="showPost(0)">
+        <div class="notif-avatar-wrap">
+          <div class="avatar av-ar" style="width:40px;height:40px;font-size:12px">AR</div>
+          <div class="notif-icon" style="background:#085041"><svg viewBox="0 0 24 24" stroke="#E1F5EE" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        </div>
+        <div class="notif-content">
+          <div class="notif-text">Your post is <b>trending</b> in the Startups hub</div>
+          <div class="notif-preview">"The startup funding landscape has shifted..."</div>
+          <div class="notif-time">5h ago</div>
+        </div>
+      </div>
+      <div class="notif-item" onclick="showToast('Opening article')">
+        <div class="notif-avatar-wrap">
+          <div class="avatar" style="width:40px;height:40px;font-size:11px;background:#FAEEDA;color:#633806">BB</div>
+          <div class="notif-icon" style="background:#BA7517"><svg viewBox="0 0 24 24" stroke="#FAEEDA" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        </div>
+        <div class="notif-content">
+          <div class="notif-text">New exclusive article in <b>Funding</b> hub</div>
+          <div class="notif-preview">"The real cost of VC funding: equity, control, and growth pressure"</div>
+          <div class="notif-time">8h ago</div>
+        </div>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+    <div class="bottomnav">
+      <button class="nav-btn" onclick="switchScreen('home')"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+      <button class="nav-btn" onclick="switchScreen('search')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+      <button class="nav-btn" onclick="switchScreen('write')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+      <button class="nav-btn active" onclick="switchScreen('notif')"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><div class="nav-dot"></div></button>
+      <button class="nav-btn" onclick="switchScreen('profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+    </div>
+  </div>
+
+  <!-- PROFILE SCREEN -->
+  <div class="screen" id="screen-profile">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="scroll-area">
+      <div class="cover-photo">
+        <div class="cover-topbar">
+          <div class="cover-btn" onclick="switchScreen('home')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+          <div class="cover-btn" onclick="showToast('Settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+        </div>
+        <div class="profile-avatar-wrap"><div class="avatar av-ar profile-av">AR</div></div>
+        <div class="profile-actions">
+          <div class="cover-btn" onclick="showToast('Share profile')"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/></svg></div>
+          <button class="outline-btn" onclick="showToast('Edit profile')">Edit profile</button>
+        </div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name">Arjun Reddy</div>
+        <div class="profile-handle">@arjunreddy · Joined Jan 2024</div>
+        <div class="profile-bio">SWE @Google · Startup angel investor · Writing about what I learn building and funding things.</div>
+        <div class="profile-hub-tags">
+          <div class="tag">Startups</div><div class="tag">AI/ML</div><div class="tag">Software</div><div class="tag">Funding</div>
+        </div>
+        <div class="profile-socials">
+          <div class="social-link" onclick="showToast('Twitter')"><svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>Twitter</div>
+          <div class="social-link" onclick="showToast('GitHub')"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>GitHub</div>
+          <div class="social-link" onclick="showToast('LinkedIn')"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>LinkedIn</div>
+        </div>
+        <div class="stats-row">
+          <div class="stat"><div class="stat-num">248</div><div class="stat-label">Posts</div></div>
+          <div class="stat"><div class="stat-num">1.4k</div><div class="stat-label">Followers</div></div>
+          <div class="stat"><div class="stat-num">312</div><div class="stat-label">Following</div></div>
+          <div class="stat"><div class="stat-num">4.2k</div><div class="stat-label">Likes</div></div>
+        </div>
+      </div>
+      <div class="profile-tabs" id="profile-tabs">
+        <div class="profile-tab active" onclick="switchProfileTab(this,'ptab-posts')">Posts</div>
+        <div class="profile-tab" onclick="switchProfileTab(this,'ptab-replies')">Replies</div>
+        <div class="profile-tab" onclick="switchProfileTab(this,'ptab-saves')">Saves</div>
+      </div>
+      <div id="ptab-posts">
+        <div class="post-card" onclick="showPost(0)">
+          <div class="pinned-label"><svg viewBox="0 0 24 24"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z"/></svg>Pinned post</div>
+          <div class="post-body">The startup funding landscape has shifted dramatically. Seed rounds that used to close in 2 weeks now take 3 months. Here's what changed →</div>
+          <div class="post-tags"><div class="tag">Startups</div><div class="tag">Funding</div></div>
+          <div class="post-actions">
+            <div class="action" onclick="event.stopPropagation();toggleLike(this)"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg><span>142</span></div>
+            <div class="action" onclick="event.stopPropagation();showToast('38 replies')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>38</span></div>
+            <div class="action" onclick="event.stopPropagation();showToast('Reposted!')"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span>21</span></div>
+            <div class="post-time">Mar 14</div>
+          </div>
+        </div>
+        <div class="post-card" onclick="showPost(1)">
+          <div class="post-body">Just shipped our first open-source AI toolkit. 200 GitHub stars in 24 hours.</div>
+          <div class="post-tags"><div class="tag">AI/ML</div><div class="tag">Software</div></div>
+          <div class="post-actions">
+            <div class="action" onclick="event.stopPropagation();toggleLike(this)"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg><span>41</span></div>
+            <div class="action" onclick="event.stopPropagation();showToast('12 replies')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>12</span></div>
+            <div class="action" onclick="event.stopPropagation();showToast('Reposted!')"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg><span>7</span></div>
+            <div class="post-time">Mar 13</div>
+          </div>
+        </div>
+      </div>
+      <div id="ptab-replies" style="display:none">
+        <div style="padding:32px 16px;text-align:center;color:var(--text3);font-size:13px">No replies yet</div>
+      </div>
+      <div id="ptab-saves" style="display:none">
+        <div class="post-card" onclick="showToast('Opening saved article')">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:64px;height:64px;border-radius:10px;background:var(--teal-light);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--teal-dark)">TC</div>
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--text);line-height:1.4;margin-bottom:4px">OpenAI raises $40B — biggest private tech funding ever</div>
+              <div style="font-size:11px;color:var(--text3)">AI/ML · 5 min · Saved 2h ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+    <div class="bottomnav">
+      <button class="nav-btn" onclick="switchScreen('home')"><svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+      <button class="nav-btn" onclick="switchScreen('search')"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+      <button class="nav-btn" onclick="switchScreen('write')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+      <button class="nav-btn" onclick="switchScreen('notif')"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+      <button class="nav-btn active" onclick="switchScreen('profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div class="nav-dot"></div></button>
+    </div>
+  </div>
+
+  <!-- POST DETAIL SCREEN -->
+  <div class="screen" id="screen-post">
+    <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+    <div class="back-topbar">
+      <button onclick="goBack()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div style="font-size:14px;font-weight:500;color:var(--text)">Post</div>
+    </div>
+    <div class="scroll-area" style="padding:0 16px">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px" id="post-detail-header"></div>
+      <div class="post-detail-body" id="post-detail-body"></div>
+      <div class="post-detail-time" id="post-detail-time"></div>
+      <div class="stats-bar" id="post-detail-stats"></div>
+      <div id="post-detail-tags" style="display:flex;gap:6px;margin-bottom:14px"></div>
+      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px">Replies</div>
+      <div id="post-comments"></div>
+      <div style="height:16px"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:0.5px solid var(--border);background:var(--bg)">
+      <div class="avatar av-ar" style="width:32px;height:32px;font-size:10px;flex-shrink:0">AR</div>
+      <input type="text" placeholder="Add a reply..." style="flex:1;border:0.5px solid var(--border2);border-radius:20px;padding:8px 14px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;background:var(--bg2);color:var(--text)">
+      <button class="teal-btn" style="padding:7px 14px" onclick="showToast('Reply posted!')">Reply</button>
+    </div>
+  </div>
+
+  <!-- HUB MODAL -->
+  <div class="modal-overlay" id="hub-modal" onclick="closeHubModal(event)">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Select a hub for your post</div>
+      <div class="hub-grid" id="hub-grid">
+        <div class="hub-option" onclick="selectHub(this)">Startups</div>
+        <div class="hub-option" onclick="selectHub(this)">AI/ML</div>
+        <div class="hub-option" onclick="selectHub(this)">Crypto</div>
+        <div class="hub-option" onclick="selectHub(this)">Software</div>
+        <div class="hub-option" onclick="selectHub(this)">Freelance</div>
+        <div class="hub-option" onclick="selectHub(this)">DSA</div>
+        <div class="hub-option" onclick="selectHub(this)">Frontend</div>
+        <div class="hub-option" onclick="selectHub(this)">Backend</div>
+        <div class="hub-option" onclick="selectHub(this)">Funding</div>
+        <div class="hub-option" onclick="selectHub(this)">Blockchain</div>
+        <div class="hub-option" onclick="selectHub(this)">Political</div>
+      </div>
+      <button class="modal-done" onclick="closeHubModal()">Done</button>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" style="display:none;position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(4,52,44,0.92);color:#E1F5EE;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:500;z-index:200;white-space:nowrap;pointer-events:none;"></div>
+
+</div>
+<script>
+const posts = [
+  { name:'Arjun Reddy', handle:'@arjunreddy', av:'av-ar', init:'AR', time:'Mar 15, 2024 · 10:42 AM', body:'The startup funding landscape has shifted dramatically. Seed rounds that used to close in 2 weeks now take 3 months.\n\nHere\'s what changed and how founders can navigate it:\n\n1. Investors are doing more due diligence\n2. Market uncertainty has increased hold times\n3. Valuations have corrected significantly\n4. Product-market fit evidence is now mandatory\n\nThe good news? This filters out tourist founders. If you can raise in this environment, you\'re building something real.', likes:142, comments:38, reposts:21, tags:['Startups','Funding'], comments_list:[{init:'SN', av:'av-sn', name:'Sneha Nair', text:'This is exactly what I\'ve been seeing too — the bar for seed has gone up significantly.', time:'2h ago'},{init:'KP', av:'av-kp', name:'Karan Patel', text:'Great thread. The investor sentiment shift is real. Most seed checks now require 6 months of revenue data.', time:'3h ago'}] },
+  { name:'Sneha Nair', handle:'@sneha', av:'av-sn', init:'SN', time:'Mar 15, 2024 · 8:15 AM', body:'Just shipped our first open-source AI toolkit. 200 GitHub stars in 24 hours.\n\nHere\'s what we built and why we open-sourced it:\n\nThe toolkit includes a lightweight inference engine, a prompt management library, and a vector store abstraction layer.\n\nWe decided to open-source because we believe the best way to build trust in AI tooling is transparency. Code doesn\'t lie.\n\nStar us on GitHub if you find it useful!', likes:41, comments:12, reposts:7, tags:['AI/ML','Software'], comments_list:[{init:'AR', av:'av-ar', name:'Arjun Reddy', text:'This is impressive work! The prompt management layer is exactly what was missing from the ecosystem.', time:'1h ago'},{init:'VK', av:'av-vk', name:'Vikram Kumar', text:'Congrats on the launch! Going to integrate the vector store abstraction in our next project.', time:'2h ago'}] },
+  { name:'Karan Patel', handle:'@karanp', av:'av-kp', init:'KP', time:'Mar 15, 2024 · 6:00 AM', body:'Unpopular opinion: Most startups don\'t need a co-founder.\n\nWhat they need is:\n- Strong advisors\n- Good hiring instincts\n- A founder who can learn fast\n\nThe co-founder obsession in VC culture is overrated. The data shows solo founders have similar or better success rates when controlling for stage.\n\nChange my mind.', likes:87, comments:34, reposts:19, tags:['Startups'], comments_list:[{init:'MR', av:'av-mr', name:'Meera Rao', text:'Disagree. Co-founders provide crucial emotional support during the hard times. It\'s not just about skills.', time:'4h ago'}] },
+  { name:'Meera Rao', handle:'@meera', av:'av-mr', init:'MR', time:'Mar 15, 2024 · 9:30 AM', body:'The best engineers I know don\'t optimize for salary.\n\nThey optimize for learning velocity.\n\nYour skills compound faster than your savings at this stage of your career. Choose environments where you\'ll be challenged, not comfortable.\n\nThe salary will follow. The growth window won\'t wait.', likes:156, comments:28, reposts:42, tags:['Software'], comments_list:[{init:'SN', av:'av-sn', name:'Sneha Nair', text:'100% agree. The 2 years I spent at a struggling startup taught me more than 5 years at a big company ever could.', time:'30m ago'}] }
+];
+let prevScreen = 'home';
+
+function switchScreen(id) {
+  prevScreen = document.querySelector('.screen.active')?.id?.replace('screen-','') || 'home';
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  if (id === 'write') { document.getElementById('compose-text').focus(); }
+}
+function goBack() { switchScreen(prevScreen); }
+function switchFeedTab(el, feedId) {
+  document.querySelectorAll('#feed-tabs .feed-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('following-feed').style.display = feedId === 'following-feed' ? 'block' : 'none';
+  document.getElementById('suggested-feed').style.display = feedId === 'suggested-feed' ? 'block' : 'none';
+}
+function switchTypeTab(el, type) {
+  document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const ph = type === 'short' ? 'What insight are you sharing today?' : 'Write your long-form article...';
+  document.getElementById('compose-text').placeholder = ph;
+}
+function switchProfileTab(el, tabId) {
+  document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['ptab-posts','ptab-replies','ptab-saves'].forEach(id => {
+    document.getElementById(id).style.display = id === tabId ? 'block' : 'none';
+  });
+}
+function filterHub(el) {
+  const parent = el.parentElement;
+  parent.querySelectorAll('.hub-pill, .ftab').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+function toggleLike(el) {
+  el.classList.toggle('liked');
+  const span = el.querySelector('span');
+  const n = parseInt(span.textContent);
+  span.textContent = el.classList.contains('liked') ? n+1 : n-1;
+}
+function updateCharCount(el) {
+  document.getElementById('char-count').textContent = el.value.length + ' / 280';
+}
+function openHubModal() {
+  document.getElementById('hub-modal').classList.add('open');
+}
+function closeHubModal(e) {
+  if (!e || e.target === document.getElementById('hub-modal')) {
+    document.getElementById('hub-modal').classList.remove('open');
+  }
+}
+function selectHub(el) {
+  document.querySelectorAll('.hub-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('selected-hub-text').textContent = el.textContent;
+}
+function submitPost() {
+  const text = document.getElementById('compose-text').value.trim();
+  if (!text) { showToast('Write something first!'); return; }
+  showToast('Post published!');
+  document.getElementById('compose-text').value = '';
+  document.getElementById('char-count').textContent = '0 / 280';
+  document.getElementById('selected-hub-text').textContent = 'Select hub';
+  setTimeout(() => switchScreen('home'), 800);
+}
+function showPost(idx) {
+  const p = posts[idx];
+  document.getElementById('post-detail-header').innerHTML = `
+    <div class="avatar ${p.av}" style="width:42px;height:42px;font-size:13px">${p.init}</div>
+    <div><div style="font-size:14px;font-weight:500;color:var(--text)">${p.name}</div><div style="font-size:12px;color:var(--text3)">${p.handle}</div></div>
+    <button class="teal-btn" style="margin-left:auto;font-size:12px;padding:6px 14px" onclick="showToast('Following!')">Follow</button>`;
+  document.getElementById('post-detail-body').textContent = p.body;
+  document.getElementById('post-detail-time').textContent = p.time;
+  document.getElementById('post-detail-stats').innerHTML = `
+    <div class="stat-item"><b>${p.likes}</b> <span>Likes</span></div>
+    <div class="stat-item"><b>${p.comments}</b> <span>Replies</span></div>
+    <div class="stat-item"><b>${p.reposts}</b> <span>Reposts</span></div>`;
+  document.getElementById('post-detail-tags').innerHTML = p.tags.map(t => `<div class="tag">${t}</div>`).join('');
+  document.getElementById('post-comments').innerHTML = p.comments_list.map(c => `
+    <div class="comment-item">
+      <div class="avatar ${c.av}" style="width:34px;height:34px;font-size:10px;flex-shrink:0">${c.init}</div>
+      <div><div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px">${c.name}</div>
+      <div class="comment-text">${c.text}</div>
+      <div class="comment-time">${c.time}</div></div>
+    </div>`).join('');
+  prevScreen = document.querySelector('.screen.active')?.id?.replace('screen-','') || 'home';
+  switchScreen('post');
+}
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.display = 'none'; }, 1800);
+}
+</script>
+</body>
+</html>
